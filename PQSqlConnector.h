@@ -2,6 +2,7 @@
 #define __PQC_H_
 
 #include <pqxx/pqxx>
+#include <sstream>
 
 using namespace pqxx;
 
@@ -11,6 +12,7 @@ private:
     std::string connstring; //store connection configuration
     connection* conn; // store current
     uint failure_time // Query Failure Time
+    ostringstream oss; //Create a stream
     
     result non_trans_query(const std::string &query); // for Non-transactional Query
     void trans_query(const std::string &query); // for Transactional Query
