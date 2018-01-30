@@ -8,28 +8,33 @@ using namespace pqxx;
 class PQSqlConnector
 {
 private:
-    std::string connstring;
-    connection* conn;
+    std::string connstring; //store connection configuration
+    connection* conn; // store current
+    uint failure_time // Query Failure Time
+    
+    result non_trans_query(const std::string &query); // for Non-transactional Query
+    void trans_query(const std::string &query); // for Transactional Query
+    bool handle_broken_connection(const int& query_case, const std::string &query); //for Handling Connection Failure 
 public:
 
-    PQSqlConnector(const std::string& connstring_input = ""):connstring(connstring_input)
+    PQSqlConnector(const std::string& connstring_input = "")
     {}
     ~PQSqlConnector()
     {}
     
-    connectDB(const std::string& connstring_input = ""); // Connect to a PostgreSql Database
+    bool connectionIsOpen(); // Check if the connection to the databse is open at the moment
      
-    createTable(const std::string& table_name);
+    bool createTable(const std::string& table_name_input); // create a table
      
-    deleteTable(const std::string& table_name);
+    bool dropTable(const std::string& table_name_input); // delete a table
      
-    insertPoint(const std::string& table_name, const double& X, const double& Y, const double& Z);
+    bool insertPoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); //insert the coordinates
      
-    updatePoint(const std::string& table_name, const double& X, const double& Y, const double& Z);
+    bool updatePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); // update the coordinates
      
-    deletePoint(const std::string& table_name, const double& X, const double& Y);
-     
-    disconnectDB(void);
+    bool deletePoint(const std::string& table_name_input, const double& X_input, const double& Y_input);
+    // delete the point; 
+    void disconnectDB(void);// explictly disconnect the database.
      
 }
 
