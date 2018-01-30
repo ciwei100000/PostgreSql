@@ -1,5 +1,5 @@
 #include <iostream>
-#include <PQSqlConnector.h>
+#include "PQSqlConnector.h"
 
 
 const int CONNECTION_FAILURE_RETRY = 10; //Time to retry in case of connection failure
@@ -11,7 +11,7 @@ const std::string DATA_TYPE_Z = "float(53)"; //Data Type for field "Z"
 //please refer to https://www.postgresql.org/docs/9.5/static/datatype-numeric.html
 
 template<class T> // Template to convert Type to String
-std::string to_string(const T& t) const
+std::string PQSqlConnector::to_string(const T& t)
 {
     oss<<t;//pass value to stream
     std::string result=oss.str();//convert to string and store to result
@@ -21,16 +21,16 @@ std::string to_string(const T& t) const
 
 
 
-PQSqlConnector::PQSqlConnector(const std::string& connstring_input = "")
+PQSqlConnector::PQSqlConnector(const std::string& connstring_input)
 {
     connstring = connstring_input;
-    if (connstring.empty)
+    if (connstring.empty())
     {
         conn = new connection();
     }
     else
     {
-        conn = new connection();
+        conn = new connection(connstring);
     }
 }
 
@@ -42,13 +42,13 @@ PQSqlConnector::~PQSqlConnector()
 
 bool PQSqlConnector::connectionIsOpen()
 {
-    if(conn->is_open)
+    if(conn->is_open())
     {
         std::cout << "Successfully connected to: " << conn->dbname() << std::endl;
         return 1;
     }
     
-    std::cout << "Cannot connected to: " << conn->hostname() " or "<< conn->dbname() << std::endl;
+    std::cout << "Cannot connected to: " << conn->hostname() << " or "<< conn->dbname() << std::endl;
     return 0;
 }
 
@@ -57,7 +57,7 @@ bool PQSqlConnector::createTable(const std::string& table_name_input)
     try
     {
         std::string table_name = table_name_input;
-        if(table_name.empty){
+        if(table_name.empty()){
             std::cerr<<"Table name is empty"<<std::endl;
             return 1;
         }
@@ -80,13 +80,13 @@ bool PQSqlConnector::createTable(const std::string& table_name_input)
 			//For more details
 			
 		    trans_query(query_create_table);
-		    std:cout<<"Table " << table_name<< " has been successfully created."<<std:endl;
+		    std::cout<<"Table " << table_name<< " has been successfully created."<<std::endl;
 	    }
 	    return 0;        
     }
     catch (const pqxx::pqxx_exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         const pqxx::sql_error *sqlerr=dynamic_cast<const pqxx::sql_error*>(&e.base());
         if (sqlerr) std::cerr << "Query was: " << sqlerr->query() << std::endl;
         return 1;
@@ -98,13 +98,13 @@ bool PQSqlConnector::dropTable(const std::string& table_name_input)
     try
     {
         trans_query("DROP TABLE " + table_name_input);
-        std:cout<<"Table " << table_name<< " has been successfully dropped."<<std:endl;
+        std::cout<<"Table " << table_name_input<< " has been successfully dropped."<<std::endl;
         return 0;
         
     }
     catch (const pqxx::pqxx_exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         const pqxx::sql_error *sqlerr=dynamic_cast<const pqxx::sql_error*>(&e.base());
         if (sqlerr) std::cerr << "Query was: " << sqlerr->query() << std::endl;
         return 1;
@@ -119,23 +119,23 @@ bool PQSqlConnector::insertPoint(const std::string& table_name_input, const doub
                                 to_string(Z_input);
         
         std::string query_insert = "INSERT INTO " + table_name_input + 
-                                   " (X, Y, Z) VALUES ("+ value_tmp +  ");"
+                                   " (X, Y, Z) VALUES ("+ value_tmp +  ");";
 
         trans_query(query_insert);
-        std::cout<<"X: "<< X <<"Y: "<< Y <<"Z: "<< Z 
+        std::cout<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input 
 		            << " successfully inserted into " << table_name_input <<std::endl;
 		return 0;
     }
     catch (const pqxx::pqxx_exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         const pqxx::sql_error *sqlerr=dynamic_cast<const pqxx::sql_error*>(&e.base());
         if (sqlerr) std::cerr << "Query was: " << sqlerr->query() << std::endl;
         return 1;
     }
 }
 
-bool PQSqlConnector::updatePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input);
+bool PQSqlConnector::updatePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input)
 {
     try
     {
@@ -143,9 +143,9 @@ bool PQSqlConnector::updatePoint(const std::string& table_name_input, const doub
                                                      "WHERE X = " + to_string(X_input) +
                                                      "AND Y= " + to_string(Y_input) + 
                                                      ";");
-        if (record_exists.empty)
+        if (record_exists.empty())
         {
-            std::cout<<"Point ("<<X<<","<<Y<<")"<<"does not exist, will insert it"<<std::endl;
+            std::cout<<"Point ("<<X_input<<","<<Y_input<<")"<<"does not exist, will insert it"<<std::endl;
             return insertPoint(table_name_input,X_input,Y_input,Z_input);
         }
         
@@ -153,15 +153,15 @@ bool PQSqlConnector::updatePoint(const std::string& table_name_input, const doub
                                    " SET Z = "+ to_string(Z_input) +
                                    " WHERE X= "+ to_string(X_input) + 
                                    " AND Y= " + to_string(Y_input) + 
-                                   ";"
+                                   ";";
         trans_query(query_update);
-        std::cout<<"X: "<< X <<"Y: "<< Y <<"Z: "<< Z 
-		            << " successfully updated into " << table_name<<std::endl;
+        std::cout<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input 
+		            << " successfully updated into " << table_name_input<<std::endl;
 		return 0;
     }
     catch (const pqxx::pqxx_exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         const pqxx::sql_error *sqlerr=dynamic_cast<const pqxx::sql_error*>(&e.base());
         if (sqlerr) std::cerr << "Query was: " << sqlerr->query() << std::endl;
         return 1;
@@ -172,12 +172,12 @@ bool PQSqlConnector::deletePoint(const std::string& table_name_input, const doub
 {
     try
     {
-        std::cout<<"X: "<< X <<"Y: "<< Y
-		            << " successfully deleted from " << table_name<<std::endl;
+        std::cout<<"X: "<< X_input <<"Y: "<< Y_input
+		            << " successfully deleted from " << table_name_input<<std::endl;
     }
     catch (const pqxx::pqxx_exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         const pqxx::sql_error *sqlerr=dynamic_cast<const pqxx::sql_error*>(&e.base());
         if (sqlerr) std::cerr << "Query was: " << sqlerr->query() << std::endl;
         return 1;
@@ -193,7 +193,7 @@ bool PQSqlConnector::disconnectDB(void)
     }
     catch (const pqxx::pqxx_exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         return 1;
     }
 }
@@ -211,7 +211,7 @@ pqxx::result PQSqlConnector::non_trans_query(const std::string &query)
     }
     catch (const broken_connection &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         return handle_broken_connection(NON_TRANSACTION_QUERY,query);
         
     }
@@ -230,7 +230,7 @@ void PQSqlConnector::trans_query(const std::string &query)
     }
     catch (const broken_connection &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.base().what() << std::endl;
         return handle_broken_connection(TRANSACTION_QUERY,query);
     }
 }
