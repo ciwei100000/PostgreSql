@@ -36,7 +36,7 @@ public:
      
     bool deletePoint(const std::string& table_name_input, const double& X_input, const double& Y_input);
     // delete the point; 
-    void disconnectDB(void);// explictly disconnect the database.
+    bool disconnectDB(void);// explictly disconnect the database.
      
 }
 
