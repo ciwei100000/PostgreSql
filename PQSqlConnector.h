@@ -12,13 +12,12 @@ private:
     std::string connstring; //store connection configuration
     connection* conn; // store current
     uint failure_time; // Query Failure Time
-    std::ostringstream oss; //Create a stream
     
-    template<class T> std::string to_string(const T& t);
-    // Template to convert Type to String
+     // Template to convert Type to String
     result non_trans_query(const std::string &query); // for Non-transactional Query
     void trans_query(const std::string &query); // for Transactional Query
-    bool handle_broken_connection(const int& query_case, const std::string &query); //for Handling Connection Failure 
+    result handle_broken_connection(const int& query_case, const std::string &query); 
+    //for Handling Connection Failure 
 public:
 
     PQSqlConnector(const std::string& connstring_input = "");
