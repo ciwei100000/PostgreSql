@@ -11,7 +11,7 @@ class PQSqlConnector
 private:
     std::string connstring; //store connection configuration
     connection* conn; // store current
-    uint failure_time; // Query Failure Time
+    unsigned int failure_time; // Query Failure Time
     
      // Template to convert Type to String
     result non_trans_query(const std::string &query); // for Non-transactional Query
