@@ -8,11 +8,9 @@ const bool VERBOSE = false; //disable notification;
 using namespace std;
 
 const int CONNECTION_FAILURE_RETRY = 10; //Time to retry in case of connection failure
-const int NON_TRANSACTION_QUERY = 0; // For handle_broken_connection
-const int TRANSACTION_QUERY = 1; // handle_broken_connection
-const std::string DATA_TYPE_X = "float(53)"; //Data Type for field "X"
-const std::string DATA_TYPE_Y = "float(53)"; //Data Type for field "Y"
-const std::string DATA_TYPE_Z = "float(53)"; //Data Type for field "Z"
+const std::string DATA_TYPE_X = "float(16)"; //Data Type for field "X"
+const std::string DATA_TYPE_Y = "float(16)"; //Data Type for field "Y"
+const std::string DATA_TYPE_Z = "float(16)"; //Data Type for field "Z"
 //please refer to https://www.postgresql.org/docs/9.5/static/datatype-numeric.html
 
 
@@ -56,6 +54,11 @@ bool PQSqlConnector::connectionIsOpen()
 	}
 }
 
+void PQSqlConnector::keepConnectionAlive()
+{
+	non_trans_query("SELECT 1");
+}
+
 bool PQSqlConnector::createTable(const std::string& table_name_input)
 {
     try
@@ -91,7 +94,11 @@ bool PQSqlConnector::createTable(const std::string& table_name_input)
 			
 		    trans_query(query_create_table);
 		    
-		    std::cout<<"Table " << table_name<< " has been successfully created."<<std::endl;
+		    if (VERBOSE)
+		    {
+		    	std::cout<<"Table " << table_name<< " has been successfully created."<<std::endl;
+		    }
+		    
 	    }
 	    return 0;        
     }
@@ -107,7 +114,10 @@ bool PQSqlConnector::dropTable(const std::string& table_name_input)
     try
     {
         trans_query("DROP TABLE " + table_name_input);
-        std::cout<<"Table " << table_name_input<< " has been successfully dropped."<<std::endl;
+        if (VERBOSE)
+        {
+        	std::cout<<"Table " << table_name_input<< " has been successfully dropped."<<std::endl;
+        }        
         return 0;
         
     }
@@ -118,7 +128,7 @@ bool PQSqlConnector::dropTable(const std::string& table_name_input)
     }
 }
 
-bool PQSqlConnector::insertPoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input)
+bool PQSqlConnector::insertSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input)
 {
     try
     {
@@ -145,7 +155,36 @@ bool PQSqlConnector::insertPoint(const std::string& table_name_input, const doub
     }
 }
 
-bool PQSqlConnector::updatePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input)
+bool PQSqlConnector::insertPointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input) //Add one insertPoint to operation Queue;
+{
+
+	try
+	{
+		std::string value_tmp = to_string(X_input)+","+to_string(Y_input)+","+
+                                to_string(Z_input);
+        
+        std::string query_insert = "INSERT INTO " + table_name_input + 
+                                   " (X, Y, Z) VALUES ("+ value_tmp +  ");" + "\n";
+                                   
+        this->queue += query_insert;
+        
+        if (VERBOSE)
+        {
+        	cout<<"Successfully add insertPoint ( "<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input
+        		<<" ) operation to queue"<<endl;
+        }
+        
+        return 0;	
+	}
+	catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }	
+		
+}
+
+bool PQSqlConnector::updateSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input)
 {
     try
     {
@@ -160,7 +199,7 @@ bool PQSqlConnector::updatePoint(const std::string& table_name_input, const doub
         		std::cout<<"Point ("<<X_input<<","<<Y_input<<")"<<"does not exist, will insert it"<<std::endl;
         	}
             
-            return insertPoint(table_name_input,X_input,Y_input,Z_input);
+            return insertSinglePoint(table_name_input,X_input,Y_input,Z_input);
         }
         
         std::string query_update = "UPDATE " + table_name_input + 
@@ -185,7 +224,35 @@ bool PQSqlConnector::updatePoint(const std::string& table_name_input, const doub
     }
 }
 
-bool PQSqlConnector::deletePoint(const std::string& table_name_input, const double& X_input, const double& Y_input)
+bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input) // Add one updatePoint to operation Queue;
+{
+
+	try
+	{
+		std::string query_update = "UPDATE " + table_name_input + 
+                                   " SET Z = "+ to_string(Z_input) +
+                                   " WHERE X= "+ to_string(X_input) + 
+                                   " AND Y= " + to_string(Y_input) + 
+                                   ";" + "\n";
+        
+    	this->queue += query_update;
+    
+    	if (VERBOSE)
+        {
+        	cout<<"Successfully add updatePoint ( "<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input
+        		<<" ) operation to queue"<<endl;
+        }
+        
+        return 0;
+	}
+	catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }   
+}
+
+bool PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input)
 {
     try
     {
@@ -206,6 +273,60 @@ bool PQSqlConnector::deletePoint(const std::string& table_name_input, const doub
         std::cerr << e.what() << std::endl;
         return 1;
     }
+}
+
+bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input)
+{
+
+	try
+	{
+		std::string query_delete = "DELETE FROM " + table_name_input +
+                                   " WHERE X= "+ to_string(X_input) + 
+                                   " AND Y= " + to_string(Y_input) + 
+                                   ";" + "\n";
+    	this->queue += query_delete;
+    	
+    	if (VERBOSE)
+        {
+        	cout<<"Successfully add deletePoint ( "<<"X: "<< X_input <<"Y: "<< Y_input
+        		<<" ) operation to queue"<<endl;
+        }
+        
+        return 0;
+	}
+	catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }                    
+}
+
+bool PQSqlConnector::commitQueue()
+//Commit and empty the operations in the operation queue
+{
+	try
+	{
+		if (!this->queue.empty())
+		{
+			string query_commit = "Begin;\n" + this->queue + "End;";
+	
+			trans_query(query_commit);
+		}
+		return 0;
+		
+	}
+	catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }	
+}
+
+bool PQSqlConnector::clearQueue()
+//empty the operation queue
+{
+	this->queue = "";
+	return 0;
 }
 
 bool PQSqlConnector::disconnectDB(void)
@@ -249,14 +370,14 @@ pqxx::result PQSqlConnector::non_trans_query(const std::string &query)
         
         if (brk_conn)
         {
-        	return handle_broken_connection(NON_TRANSACTION_QUERY,query);
+        	return handle_broken_connection_nontrans(query);
         }
         
         return pqxx::result();           
     }
 }
 
-void PQSqlConnector::trans_query(const std::string &query)
+bool PQSqlConnector::trans_query(const std::string &query)
 {
     try
     {
@@ -269,41 +390,48 @@ void PQSqlConnector::trans_query(const std::string &query)
 	    pqxx::work twerk(*conn);
 	    twerk.exec(query);
 	    twerk.commit();
-	    return; 
+	    return 0; 
     }
     catch (const pqxx::pqxx_exception &e)
     {
         std::cerr << e.base().what() << std::endl;
         const pqxx::sql_error *sqlerr=dynamic_cast<const pqxx::sql_error*>(&e.base());
         const pqxx::broken_connection *brk_conn=dynamic_cast<const pqxx::broken_connection*>(&e.base());
+        
+        if (brk_conn)
+        {
+        	return handle_broken_connection_trans(query);
+        } 
         if (sqlerr) 
         {
         	std::cerr << "Query was: " << sqlerr->query() << std::endl;
         }
-        
-        if (brk_conn)
-        {
-        	handle_broken_connection(TRANSACTION_QUERY,query);
-        }
-        return;           
+        return 1;                 
     }
 
 }
 
-pqxx::result PQSqlConnector::handle_broken_connection(const int& query_case, const std::string &query)
+bool PQSqlConnector::handle_broken_connection_trans(const std::string &query)
 {
     if (failure_time > CONNECTION_FAILURE_RETRY)
+    {
+        failure_time = 0;
+        return 1;
+    }
+    failure_time++;
+        
+    return trans_query(query);
+}
+
+pqxx::result PQSqlConnector::handle_broken_connection_nontrans(const std::string &query)
+{
+	if (failure_time > CONNECTION_FAILURE_RETRY)
     {
         failure_time = 0;
         return pqxx::result();
     }
     failure_time++;
-    switch(query_case)
-    {
-        case NON_TRANSACTION_QUERY: return non_trans_query(query);
-        case TRANSACTION_QUERY    : trans_query(query);        							
-    } 
-    
-    return pqxx::result();  
+        
+    return non_trans_query(query);
 }
 

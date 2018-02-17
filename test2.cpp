@@ -28,11 +28,12 @@ int main (int argc, char const* argv[])
     std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
     
     for(uint i = 0; i<10000; i++){
-    	X = randomNum();
-    	Y = randomNum();
-    	Z = randomNum();
+    	X = (double)(rand()/(double)RAND_MAX);
+        Y = (double)(rand()/(double)RAND_MAX);
+        Z = (double)(rand()/(double)RAND_MAX);
     	
-    	sql.updatePoint("test", X,Y,Z);
+    	//sql.keepConnectionAlive();
+    	sql.insertPoint("test", X,Y,Z);
     }
     
     std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
