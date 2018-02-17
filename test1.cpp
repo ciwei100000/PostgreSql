@@ -20,13 +20,13 @@ int main (int argc, char const* argv[])
     sql.createTable("test");
     sql.createTable("Test");
     
-    sql.insertPoint("Test", 10.97, 11.5,13.6);
-    sql.insertPoint("test", 10.97, 11.4,13.6);
+    sql.insertSinglePoint("Test", 10.97, 11.5,13.6);
+    sql.insertSinglePoint("test", 10.97, 11.4,13.6);
     
-    sql.updatePoint("Test", 10.97,11.4, 22);
-    sql.updatePoint("test", 1,2,3);
+    sql.updateSinglePoint("Test", 10.97,11.4, 22);
+    sql.updateSinglePoint("test", 1,2,3);
     
-    sql.deletePoint("Test", 1,2);
+    sql.deleteSinglePoint("Test", 1,2);
     
     sql.dropTable("test");
     sql.disconnectDB();

@@ -33,7 +33,7 @@ int main (int argc, char const* argv[])
         Z = (double)(rand()/(double)RAND_MAX);
     	
     	//sql.keepConnectionAlive();
-    	sql.insertPoint("test", X,Y,Z);
+    	sql.insertSinglePoint("test", X,Y,Z);
     }
     
     std::chrono::system_clock::time_point end = std::chrono::system_clock::now();

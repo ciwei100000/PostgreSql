@@ -8,6 +8,7 @@ const bool VERBOSE = false; //disable notification;
 using namespace std;
 
 const int CONNECTION_FAILURE_RETRY = 10; //Time to retry in case of connection failure
+const std::string DATA_TYPE_ID = "INT"; //Data Type for field "X"
 const std::string DATA_TYPE_X = "float(16)"; //Data Type for field "X"
 const std::string DATA_TYPE_Y = "float(16)"; //Data Type for field "Y"
 const std::string DATA_TYPE_Z = "float(16)"; //Data Type for field "Z"
@@ -82,10 +83,11 @@ bool PQSqlConnector::createTable(const std::string& table_name_input)
 		    }		    
 
 		    std::string query_create_table = "CREATE TABLE " + table_name + "("
+		    	"ID "+ DATA_TYPE_ID + " PRIMARY KEY" + ", "
 			    "X "+ DATA_TYPE_X + ", "
 			    "Y "+ DATA_TYPE_Y + ", "
-			    "Z "+ DATA_TYPE_Z + " NOT NULL, "
-			    "PRIMARY KEY (X,Y) "
+			    "Z "+ DATA_TYPE_Z +
+			    //"PRIMARY KEY (X,Y) "
 			    ");"; 
 			//This defines the SQL to create the table with name of [table_name]
 			//Primary Key is (X,Y) and field Z should not be Null
@@ -128,21 +130,23 @@ bool PQSqlConnector::dropTable(const std::string& table_name_input)
     }
 }
 
-bool PQSqlConnector::insertSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input)
+bool PQSqlConnector::insertSinglePoint(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input)
 {
     try
     {
-        std::string value_tmp = to_string(X_input)+","+to_string(Y_input)+","+
-                                to_string(Z_input);
+        std::string value_tmp = to_string(ID)+"," 
+        					  + to_string(X_input)+","
+        					  + to_string(Y_input)+","
+                              + to_string(Z_input);
         
         std::string query_insert = "INSERT INTO " + table_name_input + 
-                                   " (X, Y, Z) VALUES ("+ value_tmp +  ");";
+                                   " (ID, X, Y, Z) VALUES ("+ value_tmp +  ");";
 
         trans_query(query_insert);
         
         if (VERBOSE)
         {
-        	std::cout<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input 
+        	std::cout<<"ID: "<<ID<<" X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input 
 		            << " successfully inserted into " << table_name_input <<std::endl;
         }
         
@@ -155,22 +159,24 @@ bool PQSqlConnector::insertSinglePoint(const std::string& table_name_input, cons
     }
 }
 
-bool PQSqlConnector::insertPointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input) //Add one insertPoint to operation Queue;
+bool PQSqlConnector::insertPointQueue(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input) //Add one insertPoint to operation Queue;
 {
 
 	try
 	{
-		std::string value_tmp = to_string(X_input)+","+to_string(Y_input)+","+
-                                to_string(Z_input);
+		std::string value_tmp = to_string(ID)+"," 
+        					  + to_string(X_input)+","
+        					  + to_string(Y_input)+","
+                              + to_string(Z_input);
         
         std::string query_insert = "INSERT INTO " + table_name_input + 
-                                   " (X, Y, Z) VALUES ("+ value_tmp +  ");" + "\n";
+                                   " (ID, X, Y, Z) VALUES ("+ value_tmp +  ");" + "\n";
                                    
         this->queue += query_insert;
         
         if (VERBOSE)
         {
-        	cout<<"Successfully add insertPoint ( "<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input
+        	cout<<"Successfully add insertPoint ( "<<"ID: "<<ID<<" X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input
         		<<" ) operation to queue"<<endl;
         }
         
@@ -184,34 +190,36 @@ bool PQSqlConnector::insertPointQueue(const std::string& table_name_input, const
 		
 }
 
-bool PQSqlConnector::updateSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input)
+bool PQSqlConnector::updateSinglePoint(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input)
 {
     try
     {
         pqxx::result record_exists = non_trans_query("SELECT X,Y FROM "+ table_name_input +
-                                                     " WHERE X = " + to_string(X_input) +
-                                                     " AND Y= " + to_string(Y_input) + 
+        											 " WHERE ID = " + to_string(ID) +
+                                                     //" WHERE X = " + to_string(X_input) +
+                                                     //" AND Y= " + to_string(Y_input) + 
                                                      ";");
         if (record_exists.empty())
         {
         	if (VERBOSE)
         	{
-        		std::cout<<"Point ("<<X_input<<","<<Y_input<<")"<<"does not exist, will insert it"<<std::endl;
+        		std::cout<<"Point ("<<ID<<")"<<"does not exist, will insert it"<<std::endl;
         	}
             
-            return insertSinglePoint(table_name_input,X_input,Y_input,Z_input);
+            return insertSinglePoint(table_name_input,ID, X_input,Y_input,Z_input);
         }
         
         std::string query_update = "UPDATE " + table_name_input + 
-                                   " SET Z = "+ to_string(Z_input) +
-                                   " WHERE X= "+ to_string(X_input) + 
-                                   " AND Y= " + to_string(Y_input) + 
+                                   " SET X = "+ to_string(X_input) + "," +
+                                   " Y= "+ to_string(Y_input) + "," +
+                                   " Z= " + to_string(Z_input) + 
+                                   " WHERE ID= " + to_string(ID) +
                                    ";";
         trans_query(query_update);
         
         if (VERBOSE)
         {
-        	std::cout<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input 
+        	std::cout<<"ID: "<<ID<<" X: "<< X_input <<" Y: "<< Y_input <<" Z: "<< Z_input 
 		            << " successfully updated into " << table_name_input<<std::endl;
         }
         
@@ -224,22 +232,23 @@ bool PQSqlConnector::updateSinglePoint(const std::string& table_name_input, cons
     }
 }
 
-bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input) // Add one updatePoint to operation Queue;
+bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input) // Add one updatePoint to operation Queue;
 {
 
 	try
 	{
 		std::string query_update = "UPDATE " + table_name_input + 
-                                   " SET Z = "+ to_string(Z_input) +
-                                   " WHERE X= "+ to_string(X_input) + 
-                                   " AND Y= " + to_string(Y_input) + 
+                                   " SET X = "+ to_string(X_input) + "," +
+                                   " Y= "+ to_string(Y_input) + "," +
+                                   " Z= " + to_string(Z_input) + 
+                                   " WHERE ID= " + to_string(ID) +
                                    ";" + "\n";
         
     	this->queue += query_update;
     
     	if (VERBOSE)
         {
-        	cout<<"Successfully add updatePoint ( "<<"X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input
+        	cout<<"Successfully add updatePoint ( "<<"ID: "<<ID<<" X: "<< X_input <<"Y: "<< Y_input <<"Z: "<< Z_input
         		<<" ) operation to queue"<<endl;
         }
         
@@ -252,18 +261,19 @@ bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const
     }   
 }
 
-bool PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input)
+bool PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, const int& ID)
 {
     try
     {
     	std::string query_delete = "DELETE FROM " + table_name_input +
-                                   " WHERE X= "+ to_string(X_input) + 
-                                   " AND Y= " + to_string(Y_input) + 
+    							   " WHERE ID= " + to_string(ID) +
+                                   //" WHERE X= "+ to_string(X_input) + 
+                                   //" AND Y= " + to_string(Y_input) + 
                                    ";";
                                    
         trans_query(query_delete);
         
-        std::cout<<"X: "<< X_input <<"Y: "<< Y_input
+        std::cout<<"ID: "<<ID
 		            << " successfully deleted from " << table_name_input<<std::endl;
 		return 0;		            
 		
@@ -275,20 +285,19 @@ bool PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, cons
     }
 }
 
-bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input)
+bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const int& ID)
 {
 
 	try
 	{
 		std::string query_delete = "DELETE FROM " + table_name_input +
-                                   " WHERE X= "+ to_string(X_input) + 
-                                   " AND Y= " + to_string(Y_input) + 
+    							   " WHERE ID= " + to_string(ID) +
                                    ";" + "\n";
     	this->queue += query_delete;
     	
     	if (VERBOSE)
         {
-        	cout<<"Successfully add deletePoint ( "<<"X: "<< X_input <<"Y: "<< Y_input
+        	cout<<"Successfully add deletePoint ( ""ID: "<<ID
         		<<" ) operation to queue"<<endl;
         }
         

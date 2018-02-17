@@ -36,22 +36,25 @@ public:
      
     bool dropTable(const std::string& table_name_input); // delete a table
      
-    bool insertSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); //insert the coordinates
+    bool insertSinglePoint(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input); //insert the coordinates
     
-    bool insertPointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); //Add one insertPoint to operation Queue;
+    bool insertPointQueue(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input); //Add one insertPoint to operation Queue;
     
-    bool updateSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); // update the coordinates
+    bool updateSinglePoint(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input); // update the coordinates
     
-    bool updatePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); // Add one updatePoint to operation Queue;
+    bool updatePointQueue(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input); // Add one updatePoint to operation Queue;
     //Warning: This functioin will not check if the point exists. If non-existed point were to be updated, 
     //the database server would simply ingore this operation without returning any error. 
     //You should make sure the point to be updated is actually exist in the database;
      
-    bool deleteSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input);
+    bool deleteSinglePoint(const std::string& table_name_input, const int& ID);
     // delete the point; 
     
-    bool deletePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input);
+    bool deletePointQueue(const std::string& table_name_input, const int& ID);
     // Add one deletePoint to operation Queue;
+    
+    //bool deletePointsArrayQueue(const std::string& table_name_input, const int IDs[]);
+    // Add one deleteArrayPoint to operation Queue; deleteArrayPoint can delete points with id in the id array.
     
     bool commitQueue();
     //Commit and empty the operations in the operation queue
