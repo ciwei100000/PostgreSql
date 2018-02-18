@@ -309,8 +309,8 @@ bool PQSqlConnector::commitQueue()
 		if (!this->queue.empty())
 		{
 			string query_commit = "Begin;\n" + this->queue + "End;";
-	
 			trans_query(query_commit);
+			this->queue = "";
 		}
 		return 0;
 		
@@ -318,6 +318,7 @@ bool PQSqlConnector::commitQueue()
 	catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
+        this->queue = "";
         return 1;
     }	
 }
