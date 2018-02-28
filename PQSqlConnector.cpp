@@ -310,6 +310,36 @@ bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const
     }                    
 }
 
+bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const vector<int> ids)
+{
+	try
+	{
+		std::string query_delete = "DELETE FROM " + table_name_input +
+    							   " WHERE ID IN (";
+		for (unsigned int i = 0; i < ids.size(); i += 1)
+		{
+			query_delete += to_string(ids[i]);
+			if (i != ids.size()-1)
+			{
+				query_delete += ",";
+			}
+		}
+		query_delete += ");\n";
+						
+		this->queue += query_delete;
+		
+		return 0;
+	
+	}
+	catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
+	
+
+}
+
 bool PQSqlConnector::commitQueue()
 //Commit and empty the operations in the operation queue
 {

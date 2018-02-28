@@ -78,11 +78,19 @@ int main (int argc, char const* argv[])
     ID = 0;
     
     start = std::chrono::system_clock::now();
-    for(uint i = 0; i<200000; i+=1){
+    for(uint i = 0; i<60000; i+=1){
     
-    	ID++;
+    	
+    	vector<int> ids;
+    	
+    	ids.push_back(ID);
 
-    	sql.deletePointQueue("test",ID);
+		if (i % 20 == 0)
+		{
+			sql.deletePointQueue("test",ids);
+			ids.clear();
+		}
+    	
     }	
     
     sql.commitQueue();
