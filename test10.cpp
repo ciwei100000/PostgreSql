@@ -63,7 +63,7 @@ int main (int argc, char const* argv[])
     
     vector<float> updatevalues;
     
-    for(uint i = 0; i<60000; i++){
+    for(uint i = 0; i<30000; i++){
     	ID++;
     	X+=2 ;
         Y+=2 ;
@@ -73,7 +73,8 @@ int main (int argc, char const* argv[])
         updatevalues.push_back(Y);
         updatevalues.push_back(Z);
         
-        if (i % 60000 == 59999)
+        
+        if (i % 30000 == 29999)
         {
         	sql.updatePointQueue("test", updatevalues);
         }    	
