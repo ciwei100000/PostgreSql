@@ -276,10 +276,10 @@ bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const
 			if ((values.size() - i) > 3)
 			{
 				query_update += "(" + 
-				                to_string((int) values[i]) + "," + 
+				                to_string((int) values[i+3]) + "," + 
+				                to_string(values[i]) + "," +
 				                to_string(values[i+1]) + "," +
-				                to_string(values[i+2]) + "," +
-				                to_string(values[i+3]) + ")";
+				                to_string(values[i+2]) + ")";
 				
 				if ((values.size() - i) > 4)
 				{

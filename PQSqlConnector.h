@@ -50,7 +50,7 @@ public:
     
     bool updatePointQueue(const std::string& table_name_input, const std::vector<float>& values); 
     // Add one updateSinglePoint to operation Queue; 
-    // values is a vector in the format of  (id1, x1, y1, z1, id2, x2, y2, z2,...)
+    // values is a vector in the format of  (x1, y1, z1, id1, x2, y2, z2, id2,...)
     //Warning: This functioin will not check if the point exists. If non-existed point were to be updated, 
     //the database server would simply ingore this operation without returning any error. 
     //You should make sure the point to be updated is actually exist in the database;

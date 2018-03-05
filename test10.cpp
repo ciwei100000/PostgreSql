@@ -63,22 +63,22 @@ int main (int argc, char const* argv[])
     
     vector<float> updatevalues;
     
-    for(uint i = 0; i<30000; i++){
+    for(uint i = 0; i<2500; i++){
     	ID++;
     	X+=2 ;
         Y+=2 ;
         Z+=2 ;
-        updatevalues.push_back(ID);
         updatevalues.push_back(X);
         updatevalues.push_back(Y);
         updatevalues.push_back(Z);
-        
-        
-        if (i % 30000 == 29999)
-        {
-        	sql.updatePointQueue("test", updatevalues);
-        }    	
+        updatevalues.push_back(ID);
+           	
     }
+    
+
+    sql.updatePointQueue("test", updatevalues);
+    updatevalues.clear();
+
     sql.commitQueue();
     
     end = std::chrono::system_clock::now();
