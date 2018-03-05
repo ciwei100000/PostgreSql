@@ -9,9 +9,9 @@ using namespace std;
 
 const int CONNECTION_FAILURE_RETRY = 10; //Time to retry in case of connection failure
 const std::string DATA_TYPE_ID = "INT"; //Data Type for field "X"
-const std::string DATA_TYPE_X = "float(16)"; //Data Type for field "X"
-const std::string DATA_TYPE_Y = "float(16)"; //Data Type for field "Y"
-const std::string DATA_TYPE_Z = "float(16)"; //Data Type for field "Z"
+const std::string DATA_TYPE_X = "real"; //Data Type for field "X"
+const std::string DATA_TYPE_Y = "real"; //Data Type for field "Y"
+const std::string DATA_TYPE_Z = "real"; //Data Type for field "Z"
 //please refer to https://www.postgresql.org/docs/9.5/static/datatype-numeric.html
 
 
@@ -130,7 +130,7 @@ bool PQSqlConnector::dropTable(const std::string& table_name_input)
     }
 }
 
-bool PQSqlConnector::insertSinglePoint(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input)
+bool PQSqlConnector::insertSinglePoint(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input)
 {
     try
     {
@@ -159,7 +159,7 @@ bool PQSqlConnector::insertSinglePoint(const std::string& table_name_input, cons
     }
 }
 
-bool PQSqlConnector::insertPointQueue(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input) //Add one insertPoint to operation Queue;
+bool PQSqlConnector::insertPointQueue(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input) //Add one insertPoint to operation Queue;
 {
 
 	try
@@ -190,7 +190,7 @@ bool PQSqlConnector::insertPointQueue(const std::string& table_name_input, const
 		
 }
 
-bool PQSqlConnector::updateSinglePoint(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input)
+bool PQSqlConnector::updateSinglePoint(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input)
 {
     try
     {
@@ -232,7 +232,7 @@ bool PQSqlConnector::updateSinglePoint(const std::string& table_name_input, cons
     }
 }
 
-bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const int& ID, const double& X_input, const double& Y_input, const double& Z_input) // Add one updatePoint to operation Queue;
+bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input) // Add one updatePoint to operation Queue;
 {
 
 	try
@@ -261,14 +261,55 @@ bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const
     }   
 }
 
+bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const vector<float>& values)
+{
+	try
+	{
+		std::string query_update = "UPDATE " + table_name_input + 
+                                   " SET X = tmp.X,"
+                                   " Y= tmp.Y,"
+                                   " Z= tmp.Z"
+                                   " FROM (" + "VALUES ";
+		
+		for (unsigned int i = 0; i < values.size(); i += 4)
+		{
+			if ((values.size() - i) > 3)
+			{
+				query_update += "(" + 
+				                to_string((int) values[i]) + "," + 
+				                to_string(values[i+1]) + "," +
+				                to_string(values[i+2]) + "," +
+				                to_string(values[i+3]) + ")";
+				
+				if ((values.size() - i) > 4)
+				{
+					query_update += ",";
+				}
+			}
+		}
+                                   
+        query_update += ") AS tmp(ID,X,Y,Z)"
+                        " WHERE " + table_name_input + 
+                        ".ID=tmp.ID;" 
+                        "\n";
+        
+    	this->queue += query_update;
+        
+        return 0;
+	}
+	catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
+}
+
 bool PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, const int& ID)
 {
     try
     {
     	std::string query_delete = "DELETE FROM " + table_name_input +
     							   " WHERE ID= " + to_string(ID) +
-                                   //" WHERE X= "+ to_string(X_input) + 
-                                   //" AND Y= " + to_string(Y_input) + 
                                    ";";
                                    
         trans_query(query_delete);
@@ -310,7 +351,7 @@ bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const
     }                    
 }
 
-bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const vector<int> ids)
+bool PQSqlConnector::deletePointQueue(const std::string& table_name_input, const vector<int>& ids)
 {
 	try
 	{

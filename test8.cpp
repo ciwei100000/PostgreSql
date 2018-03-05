@@ -33,7 +33,7 @@ int main (int argc, char const* argv[])
     Y= 0.1;
     Z= 0.1;
     
-    for(uint i = 0; i<100000; i++){
+    for(uint i = 0; i<1000000; i++){
     
 		ID++;    
     	X++ ;
@@ -61,14 +61,14 @@ int main (int argc, char const* argv[])
     
     start = std::chrono::system_clock::now();
     
-    for(uint i = 0; i<1000; i++){
+    for(uint i = 0; i<10000; i++){
     	ID++;
     	X+=2 ;
         Y+=2 ;
         Z+=2 ;
     	sql.updatePointQueue("test", ID,X,Y,Z);
     }
-    sql.commitQueue();
+    //sql.clearQueue();
     
     end = std::chrono::system_clock::now();
     
@@ -85,7 +85,7 @@ int main (int argc, char const* argv[])
     	
     	ids.push_back(ID);
 
-		if (i % 100 == 0)
+		if (i % 20 == 0)
 		{
 			sql.deletePointQueue("test",ids);
 			ids.clear();

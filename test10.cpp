@@ -61,12 +61,22 @@ int main (int argc, char const* argv[])
     
     start = std::chrono::system_clock::now();
     
-    for(uint i = 0; i<1000; i++){
+    vector<float> updatevalues;
+    
+    for(uint i = 0; i<60000; i++){
     	ID++;
     	X+=2 ;
         Y+=2 ;
         Z+=2 ;
-    	sql.updatePointQueue("test", ID,X,Y,Z);
+        updatevalues.push_back(ID);
+        updatevalues.push_back(X);
+        updatevalues.push_back(Y);
+        updatevalues.push_back(Z);
+        
+        if (i % 60000 == 59999)
+        {
+        	sql.updatePointQueue("test", updatevalues);
+        }    	
     }
     sql.commitQueue();
     
@@ -85,7 +95,7 @@ int main (int argc, char const* argv[])
     	
     	ids.push_back(ID);
 
-		if (i % 100 == 0)
+		if (i % 100 == 99)
 		{
 			sql.deletePointQueue("test",ids);
 			ids.clear();
