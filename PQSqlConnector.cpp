@@ -265,33 +265,41 @@ bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const
 {
 	try
 	{
-		std::string query_update = "UPDATE " + table_name_input + 
-                                   " SET X = tmp.X,"
-                                   " Y= tmp.Y,"
-                                   " Z= tmp.Z"
-                                   " FROM (" + "VALUES ";
-		
+	
+		string ids = "";
+		string xs = "";
+		string ys = "";
+		string zs = "";
+			
 		for (unsigned int i = 0; i < values.size(); i += 4)
 		{
 			if ((values.size() - i) > 3)
 			{
-				query_update += "(" + 
-				                to_string((int) values[i]) + "," + 
-				                to_string(values[i+1]) + "," +
-				                to_string(values[i+2]) + "," +
-				                to_string(values[i+3]) + ")";
-				
-				if ((values.size() - i) > 4)
-				{
-					query_update += ",";
-				}
+				ids += to_string(values[i]);
+				xs += to_string(values[i+1]);
+				ys += to_string(values[i+2]);
+				zs += to_string(values[i+3]);
+			}
+			
+			if ((values.size() - i) > 4)
+			{
+				ids += ",";
+				xs += ",";
+				ys += ",";
+				zs += ",";
 			}
 		}
                                    
-        query_update += ") AS tmp(ID,X,Y,Z)"
-                        " WHERE " + table_name_input + 
-                        ".ID=tmp.ID;" 
-                        "\n";
+        std::string query_update = "UPDATE " + table_name_input + 
+                                   " SET X = tmp.X,"
+                                   " Y= tmp.Y,"
+                                   " Z= tmp.Z"
+                                   " FROM ( SELECT UNNEST( ARRAY[" + ids +"]) AS ID,"
+                                   " UNNEST( ARRAY[" + xs + "]) AS X,"
+                                   " UNNEST( ARRAY[" + ys + "]) AS Y,"
+                                   " UNNEST( ARRAY[" + zs + "]) AS Z) AS tmp"
+                                   " WHERE " + table_name_input +
+                                   ".ID = tmp.ID;"+"\n"; 
         
     	this->queue += query_update;
         

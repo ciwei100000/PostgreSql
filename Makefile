@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS= -O3 -std=c++11 -Wall
 LIBS = -lpq -lpqxx
-SRCS = PQSqlConnector.cpp test8.cpp
+SRCS = PQSqlConnector.cpp test10.cpp
 OBJS = $(SRCS:.cpp=.o)
 MAIN = test
 DEPS = 
