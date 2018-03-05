@@ -17,6 +17,7 @@ int main (int argc, char const* argv[])
 	// When lost or failed backend connection happens on Unix-like systems, you may also get a SIGPIPE signal. That signal aborts the program by default, so if you wish to be able to continue after a connection breaks, be sure to disarm this signal.If you're working on a Unix-like system, see the manual page for signal (2) on how to deal with SIGPIPE. The easiest way to make this signal harmless is to make your program ignore it
 	
 	double X,Y,Z;
+	int ID;
 
     PQSqlConnector sql(connection_config);
     
@@ -27,18 +28,20 @@ int main (int argc, char const* argv[])
 
     std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
     
+    ID = 0;
     X= 0.1;
     Y= 0.1;
     Z= 0.1;
     
     for(uint i = 0; i<1000000; i++){
-     
+    
+		ID++;    
     	X++ ;
         Y++ ;
         Z++ ;
     	
     	//sql.keepConnectionAlive();
-    	sql.insertPointQueue("test", X,Y,Z);
+    	sql.insertPointQueue("test", ID,X,Y,Z);
     	
     	if(i % 10000 == 0)
     		sql.commitQueue();
@@ -54,15 +57,16 @@ int main (int argc, char const* argv[])
     X = 0.1;
     Y = 0.1;
     Z = 0.1;
+    ID = 0;
     
     start = std::chrono::system_clock::now();
     
     for(uint i = 0; i<10000; i++){
-    
+    	ID++;
     	X+=2 ;
         Y+=2 ;
         Z+=2 ;
-    	sql.updatePointQueue("test", X,Y,Z);
+    	sql.updatePointQueue("test", ID,X,Y,Z);
     }
     sql.commitQueue();
     
@@ -71,16 +75,14 @@ int main (int argc, char const* argv[])
     cout<<"Consumer Time: "<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
     	<<" ms"<<endl;
     	
-    X = 0.1;
-    Y = 0.1;
+    ID = 0;
     
     start = std::chrono::system_clock::now();
-    for(uint i = 0; i<60000; i++){
-    	
-    	X++;
-    	Y++;
+    for(uint i = 0; i<200000; i+=1){
+    
+    	ID++;
 
-    	sql.deletePointQueue("test",X,Y);
+    	sql.deletePointQueue("test",ID);
     }	
     
     sql.commitQueue();

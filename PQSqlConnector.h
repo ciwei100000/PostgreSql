@@ -3,6 +3,7 @@
 
 #include <pqxx/pqxx>
 #include <sstream>
+#include <vector>
 
 using namespace pqxx;
 
@@ -36,22 +37,33 @@ public:
      
     bool dropTable(const std::string& table_name_input); // delete a table
      
-    bool insertSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); //insert the coordinates
+    bool insertSinglePoint(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input); //insert the coordinates of one point
     
-    bool insertPointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); //Add one insertPoint to operation Queue;
+    bool insertPointQueue(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input); //Add one insertSinglePoint to operation Queue;
     
-    bool updateSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); // update the coordinates
+    bool updateSinglePoint(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input); // update the coordinates of one point
     
-    bool updatePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input, const double& Z_input); // Add one updatePoint to operation Queue;
+    bool updatePointQueue(const std::string& table_name_input, const int& ID, const float& X_input, const float& Y_input, const float& Z_input); // Add one updateSinglePoint to operation Queue;
+    //Warning: This functioin will not check if the point exists. If non-existed point were to be updated, 
+    //the database server would simply ingore this operation without returning any error. 
+    //You should make sure the point to be updated is actually exist in the database;
+    
+    bool updatePointQueue(const std::string& table_name_input, const std::vector<float>& values); 
+    // Add one updateSinglePoint to operation Queue; 
+    // values is a vector in the format of  (x1, y1, z1, id1, x2, y2, z2, id2,...)
     //Warning: This functioin will not check if the point exists. If non-existed point were to be updated, 
     //the database server would simply ingore this operation without returning any error. 
     //You should make sure the point to be updated is actually exist in the database;
      
-    bool deleteSinglePoint(const std::string& table_name_input, const double& X_input, const double& Y_input);
-    // delete the point; 
+    bool deleteSinglePoint(const std::string& table_name_input, const int& ID);
+    // delete one point; 
     
-    bool deletePointQueue(const std::string& table_name_input, const double& X_input, const double& Y_input);
+    bool deletePointQueue(const std::string& table_name_input, const int& ID);
     // Add one deletePoint to operation Queue;
+    
+    //bool deletePointsArrray(const std::string& table_name_input, const vector);
+    
+    bool deletePointQueue(const std::string& table_name_input, const std::vector<int>& ids);
     
     bool commitQueue();
     //Commit and empty the operations in the operation queue

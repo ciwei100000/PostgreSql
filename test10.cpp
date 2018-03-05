@@ -8,7 +8,7 @@ using namespace std;
 
 string connection_config = "dbname=test user=postgres password=postgres hostaddr=127.0.0.1 port=5432";
 
-double randomNum();
+float randomNum();
 
 int main (int argc, char const* argv[])
 {
@@ -16,7 +16,7 @@ int main (int argc, char const* argv[])
 	signal(SIGPIPE, SIG_IGN); 
 	// When lost or failed backend connection happens on Unix-like systems, you may also get a SIGPIPE signal. That signal aborts the program by default, so if you wish to be able to continue after a connection breaks, be sure to disarm this signal.If you're working on a Unix-like system, see the manual page for signal (2) on how to deal with SIGPIPE. The easiest way to make this signal harmless is to make your program ignore it
 	
-	double X,Y,Z;
+	float X,Y,Z;
 	int ID;
 
     PQSqlConnector sql(connection_config);
@@ -33,7 +33,7 @@ int main (int argc, char const* argv[])
     Y= 0.1;
     Z= 0.1;
     
-    for(uint i = 0; i<200000; i++){
+    for(uint i = 0; i<100000; i++){
     
 		ID++;    
     	X++ ;
@@ -42,9 +42,12 @@ int main (int argc, char const* argv[])
     	
     	//sql.keepConnectionAlive();
     	sql.insertPointQueue("test", ID,X,Y,Z);
+    	
+    	if(i % 10000 == 0)
+    		sql.commitQueue();
     }
     
-    sql.commitQueue();
+    
     
     std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
     
@@ -56,13 +59,26 @@ int main (int argc, char const* argv[])
     Z = 0.1;
     ID = 0;
     
-    for(uint i = 0; i<200000; i++){
+    start = std::chrono::system_clock::now();
+    
+    vector<float> updatevalues;
+    
+    for(uint i = 0; i<2500; i++){
     	ID++;
     	X+=2 ;
         Y+=2 ;
         Z+=2 ;
-    	sql.updatePointQueue("test", ID,X,Y,Z);
+        updatevalues.push_back(X);
+        updatevalues.push_back(Y);
+        updatevalues.push_back(Z);
+        updatevalues.push_back(ID);
+           	
     }
+    
+
+    sql.updatePointQueue("test", updatevalues);
+    updatevalues.clear();
+
     sql.commitQueue();
     
     end = std::chrono::system_clock::now();
@@ -71,11 +87,21 @@ int main (int argc, char const* argv[])
     	<<" ms"<<endl;
     	
     ID = 0;
-    for(uint i = 0; i<200000; i++){
     
-    	ID++;
+    start = std::chrono::system_clock::now();
+    for(uint i = 0; i<60000; i+=1){
+    
+    	
+    	vector<int> ids;
+    	
+    	ids.push_back(ID);
 
-    	sql.deletePointQueue("test", ID);
+		if (i % 100 == 99)
+		{
+			sql.deletePointQueue("test",ids);
+			ids.clear();
+		}
+    	
     }	
     
     sql.commitQueue();
@@ -94,12 +120,12 @@ int main (int argc, char const* argv[])
     return 0;
 }
 
-double randomNum()
+float randomNum()
 {
 
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	std::default_random_engine generator (seed);
-	std::uniform_real_distribution<double> distribution (-100.0,100.0);
+	std::uniform_real_distribution<float> distribution (-100.0,100.0);
 	return distribution(generator);
 	
 }

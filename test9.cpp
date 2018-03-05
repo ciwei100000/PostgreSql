@@ -1,6 +1,7 @@
 #include "PQSqlConnector.h"
 #include <csignal>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -22,10 +23,18 @@ int main (int argc, char const* argv[])
     sql.insertPointQueue("Test", 1, 10.97, 11.5,13.6);
     sql.insertPointQueue("test", 2, 10.97, 11.4,13.6);
     
-    sql.updatePointQueue("Test", 2,10.97,11.4, 22);
     sql.insertPointQueue("test", 3, 1,2,3);
+    sql.insertPointQueue("test", 4, 1,2,3);
+    sql.insertPointQueue("test", 5, 1,2,3);
     
-    sql.deletePointQueue("Test", 3);
+    float u[] = {3, 1.0, 3.5, 4, 2, 10.97,11.4,21};
+    vector<float> updatearray(u,u+8);
+    sql.updatePointQueue("test", updatearray);
+    
+    int n[] = {5, 6};
+    vector<int> deletearray(n,n+3);
+    
+    sql.deletePointQueue("Test", deletearray);
     
     sql.commitQueue();
     
