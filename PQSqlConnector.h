@@ -54,6 +54,8 @@ public:
     //Warning: This functioin will not check if the point exists. If non-existed point were to be updated, 
     //the database server would simply ingore this operation without returning any error. 
     //You should make sure the point to be updated is actually exist in the database;
+    
+    bool upsertPointQueue(const std::string& table_name_input, const std::vector<float>& values);
      
     bool deleteSinglePoint(const std::string& table_name_input, const int& ID);
     // delete one point; 
