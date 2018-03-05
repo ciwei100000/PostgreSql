@@ -308,7 +308,37 @@ bool PQSqlConnector::upsertPointQueue(const std::string& table_name_input, const
 {
 	try
 	{
-		std::string query_upsert = "INSERT INTO " + table_name_input + "( 
+		std::string query_upsert = "INSERT INTO " + table_name_input +
+								   " (ID, X, Y, Z) VALUES ";
+		
+		for (unsigned int i = 0; i < values.size(); i += 4)
+		{
+			if ((values.size() - i) > 3)
+			{
+				query_upsert += "(" + 
+				                to_string((int) values[i+3]) + "," + 
+				                to_string(values[i]) + "," +
+				                to_string(values[i+1]) + "," +
+				                to_string(values[i+2]) + 
+				                ")";
+				
+				if ((values.size() - i) > 4)
+				{
+					query_upsert += ",";
+				}
+			}
+		}
+		
+		query_upsert += " ON CONFLICT(ID) DO"
+						" UPDATE SET "
+						" X = excluded.X,"
+						" Y = excluded.Y,"
+						" Z = excluded.Z"
+						";\n";
+		
+		this->queue += query_upsert;				
+		
+		return 0;
 	}
 	catch (const std::exception &e)
     {

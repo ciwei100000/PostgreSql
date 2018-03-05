@@ -27,7 +27,7 @@ int main (int argc, char const* argv[])
     sql.insertPointQueue("test", 4, 1,2,3);
     sql.insertPointQueue("test", 5, 1,2,3);
     
-    float u[] = {3, 1.0, 3.5, 4, 2, 10.97,11.4,21};
+    float u[] = {1.0, 3.5, 4,3,10.97,11.4,21,2};
     vector<float> updatearray(u,u+8);
     sql.updatePointQueue("test", updatearray);
     

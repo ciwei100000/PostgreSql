@@ -56,6 +56,8 @@ public:
     //You should make sure the point to be updated is actually exist in the database;
     
     bool upsertPointQueue(const std::string& table_name_input, const std::vector<float>& values);
+    //Add point if id does not exist or update if id already exists
+    //values is a vector in the format of  (x1, y1, z1, id1, x2, y2, z2, id2,...)
      
     bool deleteSinglePoint(const std::string& table_name_input, const int& ID);
     // delete one point; 
