@@ -304,6 +304,19 @@ bool PQSqlConnector::updatePointQueue(const std::string& table_name_input, const
     }
 }
 
+bool PQSqlConnector::upsertPointQueue(const std::string& table_name_input, const std::vector<float>& values)
+{
+	try
+	{
+		std::string query_upsert = "INSERT INTO " + table_name_input + "( 
+	}
+	catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
+}
+
 bool PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, const int& ID)
 {
     try
