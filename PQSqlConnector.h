@@ -5,7 +5,20 @@
 #include <sstream>
 #include <vector>
 
+
+const bool DEBUG = false; //used only for debug;
+const bool VERBOSE = false; //disable notification;
+
+const int CONNECTION_FAILURE_RETRY = 10; //Time to retry in case of connection failure
+const std::string DATA_TYPE_ID = "INT"; //Data Type for field "X"
+const std::string DATA_TYPE_X = "real"; //Data Type for field "X"
+const std::string DATA_TYPE_Y = "real"; //Data Type for field "Y"
+const std::string DATA_TYPE_Z = "real"; //Data Type for field "Z"
+//please refer to https://www.postgresql.org/docs/9.5/static/datatype-numeric.html
+
 using namespace pqxx;
+using namespace std;
+
 
 class PQSqlConnector
 {

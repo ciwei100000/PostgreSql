@@ -6,7 +6,7 @@
 
 using namespace std;
 
-string connection_config = "dbname=test user=postgres password=postgres hostaddr=127.0.0.1 port=5432";
+const string connection_config = "dbname=test user=postgres password=postgres hostaddr=127.0.0.1 port=5432";
 
 float randomNum();
 
