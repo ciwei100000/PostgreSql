@@ -439,8 +439,8 @@ int PQSqlConnector::upsertPointQueue(const std::string& table_name_input, const 
 				{
 					query_upsert += ",";
 				}
-			}
-		}
+			}//if values.size() - i > 3
+		}//for
 		
 		query_upsert += " ON CONFLICT(ID) DO"
 						" UPDATE SET "
@@ -452,13 +452,13 @@ int PQSqlConnector::upsertPointQueue(const std::string& table_name_input, const 
 		this->queue += query_upsert;				
 		
 		return 0;
-	}
+	}//try
 	catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
         return -1;
-    }
-}
+    }//catch
+}//upsertPointQueue
 
 int PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, const int& ID)
 {
@@ -490,13 +490,13 @@ int PQSqlConnector::deleteSinglePoint(const std::string& table_name_input, const
 		}
 		return ret;		            
 		
-    }
+    }//try
     catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
         return -1;
-    }
-}
+    }//catch
+}//deleteSinglePoint
 
 int PQSqlConnector::deletePointQueue(const std::string& table_name_input, const int& ID)
 {
@@ -530,8 +530,8 @@ int PQSqlConnector::deletePointQueue(const std::string& table_name_input, const 
     {
         std::cerr << e.what() << std::endl;
         return -1;
-    }                    
-}
+    }//catch                   
+}//deletePointQueue(point)
 
 int PQSqlConnector::deletePointQueue(const std::string& table_name_input, const std::vector<int>& ids)
 {
@@ -560,15 +560,13 @@ int PQSqlConnector::deletePointQueue(const std::string& table_name_input, const 
 		
 		return 0;
 	
-	}
+	}//try
 	catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
         return -1;
-    }
-	
-
-}
+    }//catch
+}//deletePointQueue(vector)
 
 int PQSqlConnector::commitQueue()
 //Commit and empty the operations in the operation queue
