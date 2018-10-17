@@ -568,6 +568,167 @@ int PQSqlConnector::deletePointQueue(const std::string& table_name_input, const 
     }//catch
 }//deletePointQueue(vector)
 
+
+int PQSqlConnector::readPointsVector(const std::string& table_name_input, std::vector<float>& values)
+{
+    try
+    {
+        std::string query_read = "SELECT X,Y,Z,ID FROM " + table_name_input +
+                                 " ORDER BY ID ASC" + 
+                                 ";";
+        pqxx::result res(non_trans_query(query_read));
+        
+        for (pqxx::result::size_type i = 0; i < res.size(); ++i)
+        {
+            for (uint j = 0; j < 4; ++j)
+            {
+            	values.push_back(res[i][j].as<float>());
+            }//inner for
+        }//outer for
+        
+        return 0;
+        //std::cout<<res<<std::endl;
+    }//try
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return -1;
+    }//catch
+
+}//readPointsVector(simple)
+
+int PQSqlConnector::readPointsVector(const std::string& table_name_input, std::vector<float>& values, const int& start_id)
+{
+    try
+    {
+        std::string query_read = "SELECT X,Y,Z,ID FROM " + table_name_input +
+                                 " WHERE ID >= " + std::to_string(start_id) +
+                                 " ORDER BY ID ASC" + 
+                                 ";";
+                                 
+        pqxx::result res(non_trans_query(query_read));
+        
+        for (pqxx::result::size_type i = 0; i < res.size(); ++i)
+        {
+            for (uint j = 0; j < 4; ++j)
+            {
+            	values.push_back(res[i][j].as<float>());
+            }//inner for
+        }//outer for
+        
+        return 0;
+        //std::cout<<res<<std::endl;
+    }//try
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return -1;
+    }//catch 
+
+}//readPointsVector(int,nolimit)
+
+int PQSqlConnector::readPointsVector(const std::string& table_name_input, std::vector<float>& values, const float& start_id)
+{
+    try
+    {
+        std::string query_read = "SELECT X,Y,Z,ID FROM " + table_name_input +
+                                 " WHERE ID >= " + std::to_string(start_id) +
+                                 " ORDER BY ID ASC" + 
+                                 ";";
+                                 
+        pqxx::result res(non_trans_query(query_read));
+        
+        for (pqxx::result::size_type i = 0; i < res.size(); ++i)
+        {
+            for (uint j = 0; j < 4; ++j)
+            {
+            	values.push_back(res[i][j].as<float>());
+            }//inner for
+        }//outer for
+        
+        return 0;
+        //std::cout<<res<<std::endl;
+    }//try
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return -1;
+    }//catch
+
+}//readPointsVector(float,nolimit)
+
+int PQSqlConnector::readPointsVector(const std::string& table_name_input, std::vector<float>& values, const int& start_id, const int& limit)
+{
+    try
+    {
+        if (UNLIKELY(limit <= 0))
+        {
+            std::cerr<<"WARNING(PQSqlConnector::readPointsVector): limit is non-positive"<<std::endl;
+            return -1;
+        }
+        std::string query_read = "SELECT X,Y,Z,ID FROM " + table_name_input +
+                                 " WHERE ID >= " + std::to_string(start_id) +
+                                 " ORDER BY ID ASC" + 
+                                 " LIMIT " + std::to_string(limit) +
+                                 ";";
+                                 
+        pqxx::result res(non_trans_query(query_read));
+        
+        for (pqxx::result::size_type i = 0; i < res.size(); ++i)
+        {
+            for (uint j = 0; j < 4; ++j)
+            {
+            	values.push_back(res[i][j].as<float>());
+            }//inner for
+        }//outer for
+        
+        return 0;
+        //std::cout<<res<<std::endl;
+    }//try
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return -1;
+    }//catch
+
+}//readPointsVector(int,limit)
+
+int PQSqlConnector::readPointsVector(const std::string& table_name_input, std::vector<float>& values, const float& start_id, const int& limit)
+{
+    try
+    {
+        if (UNLIKELY(limit <= 0))
+        {
+            std::cerr<<"WARNING(PQSqlConnector::readPointsVector): limit is non-positive"<<std::endl;
+            return -1;
+        }
+        std::string query_read = "SELECT X,Y,Z,ID FROM " + table_name_input +
+                                 " WHERE ID >= " + std::to_string(start_id) +
+                                 " ORDER BY ID ASC" + 
+                                 " LIMIT " + std::to_string(limit) +
+                                 ";";
+                                 
+        pqxx::result res(non_trans_query(query_read));
+        
+        for (pqxx::result::size_type i = 0; i < res.size(); ++i)
+        {
+            for (uint j = 0; j < 4; ++j)
+            {
+            	values.push_back(res[i][j].as<float>());
+            }//inner for
+        }//outer for
+        
+        return 0;
+        //std::cout<<res<<std::endl;
+    }//try
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return -1;
+    }//catch
+
+}//readPointsVector(float,limit)
+
 int PQSqlConnector::commitQueue()
 //Commit and empty the operations in the operation queue
 {

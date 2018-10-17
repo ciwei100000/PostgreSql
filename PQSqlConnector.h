@@ -7,7 +7,7 @@
 
 
 const bool DEBUG = false; //used only for debug;
-const bool VERBOSE = true; //disable notification;
+const bool VERBOSE = false; //disable notification;
 
 const int CONNECTION_FAILURE_RETRY = 100; //Time to retry in case of connection failure
 const std::string DATA_TYPE_ID = "INT"; //Data Type for field "X"
@@ -75,9 +75,28 @@ public:
     int deletePointQueue(const std::string& table_name_input, const int& ID);
     // Add one deletePoint to operation Queue;
     
-    //bool deletePointsArrray(const std::string& table_name_input, const vector);
-    
     int deletePointQueue(const std::string& table_name_input, const std::vector<int>& ids);
+    // Add one deletePoint to operation Queue;
+    
+    int readPointsVector(const std::string& table_name_input, std::vector<float>& values);
+    //read points from the table named [table_name_input],sorted by id ascending
+    //output values to a float vector, format: [x1,y1,z1,id1,x2,y2,z2,id2,...]
+    
+    int readPointsVector(const std::string& table_name_input, std::vector<float>& values, const int& start_id);
+    //read points from the table named [table_name_input],starting from [start_id],sorted by id ascending
+    //output values to a float vector, format: [x1,y1,z1,id1,x2,y2,z2,id2,...]
+    
+    int readPointsVector(const std::string& table_name_input, std::vector<float>& values, const float& start_id);
+    //read points from the table named [table_name_input], starting from [start_id],sorted by id ascending
+    //output values to a float vector, format: [x1,y1,z1,id1,x2,y2,z2,id2,...]
+    
+    int readPointsVector(const std::string& table_name_input, std::vector<float>& values, const int& start_id, const int& limit);
+    //read [limit] of points from the table named [table_name_input],starting from [start_id], sorted by id ascending 
+    //output values to a float vector, format: [x1,y1,z1,id1,x2,y2,z2,id2,...]
+    
+    int readPointsVector(const std::string& table_name_input, std::vector<float>& values, const float& start_id, const int& limit);
+    //read [limit] of points from the table named [table_name_input],starting from [start_id], sorted by id ascending 
+    //output values to a float vector, format: [x1,y1,z1,id1,x2,y2,z2,id2,...]
     
     int commitQueue();
     //Commit and empty the operations in the operation queue
