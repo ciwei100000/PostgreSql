@@ -75,11 +75,11 @@ int main (int argc, char const* argv[])
     
     vector<float> updatevalues;
     
-    for(uint i = 0; i<2500; i++){
+    for(uint i = 0; i<10000; i++){
     	ID++;
-    	X=2 ;
-        Y=2 ;
-        Z=2 ;
+    	X+=2 ;
+        Y+=2 ;
+        Z+=2 ;
         updatevalues.push_back(X);
         updatevalues.push_back(Y);
         updatevalues.push_back(Z);
